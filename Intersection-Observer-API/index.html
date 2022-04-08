@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Intersection Observer API</title>
+  <style>
+    html,
+    body {
+      padding: 0;
+      margin: 0;
+    }
+
+    div {
+      position: absolute;
+    }
+
+    .div {
+      width: 100px;
+      height: 100px;
+      background-color: red;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      font-weight: bold;
+      user-select: none;
+      cursor: pointer;
+    }
+
+    .range {
+      border: 3px solid #666;
+      background-color: rgba(0.5, 0.5, 0, 0.2);
+      align-items: center;
+      justify-content: center;
+      font-size: 38px;
+      display: flex;
+      color: #666;
+      user-select: none;
+    }
+
+    #range1 {
+      height: 100%;
+      width: 100%;
+    }
+
+    #range2 {
+      height: 50%;
+      width: 50%;
+      left: 25%;
+      top: 25%;
+      position: fixed;
+    }
+  </style>
+</head>
+
+<body>
+  <div style="height: 500px; width: 50%; background-color: yellow;" id="container">
+    <div id="range1" class="range">
+      Observer 1 Range
+    </div>
+    <div id="div2" class="div">Div2</div>
+    <div id="div3" class="div">Div3</div>
+  </div>
+  <div id="range2" class="range">
+    Observer 2 Range
+  </div>
+  <div id="div1" class="div">Div1</div>
+  <div id="div4" class="div">Div4</div>
+
+  <script>
+    var target;
+    document.addEventListener('mousemove', function (e) {
+      if (target) {
+        target.style.left = e.clientX - 50 + 'px';
+        target.style.top = e.clientY - 50 + 'px';
+      }
+    });
+    document.querySelectorAll('.div').forEach(item => {
+      item.addEventListener('mousedown', (e) => {
+        target = e.currentTarget;
+      });
+      item.addEventListener('mouseup', (e) => {
+        target = null;
+      });
+    });
+
+    const callback = (entries, observer) => {
+      entries.forEach(entry => {
+        console.log(observer.name, entry.target.id, entry.intersectionRatio, entry);
+      });
+    };
+    const option1 = {
+      root: document.querySelector("#container"),
+      threshold: [0, 0.5, 1],
+    }
+    const option2 = {
+      rootMargin: '-25%',
+      threshold: [0, 0.5, 1],
+    }
+    const observer1 = new IntersectionObserver(callback, option1);
+    const observer2 = new IntersectionObserver(callback, option2);
+    [observer1, observer2].forEach((observer, index) => {
+      observer.name = `observer-${index + 1}`;
+      ['#div1', '#div2', '#div3', '#div4'].forEach(selector => {
+        observer.observe(document.querySelector(selector));
+      });
+    });
+  </script>
+</body>
+
+</html>
