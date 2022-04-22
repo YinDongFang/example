@@ -116,7 +116,7 @@
     </div>
   </div>
   <script>
-    fetch(`https://func-aj-gift-adonahnxqh.cn-shenzhen.fcapp.run`)
+    fetch(`https://func-aj-gift-adonahnxqh.cn-shenzhen.fcapp.run/list`)
       .then(async res => {
         const list = await res.json();
         const totalWeight = list.reduce((sum, item) => sum + item.weight, 0);
