@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>幸运抽奖</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+    integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jquery.easing@1.4.1/jquery.easing.min.js"></script>
+  <style>
+    * {
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      background-image: url("res/background.png");
+      background-size: 100% 100%;
+      position: fixed;
+      left: 0;
+      right: 0;
+      top: 0;
+      bottom: 0;
+    }
+
+    .title {
+      position: absolute;
+      left: 15%;
+      top: 10%;
+      background-image: url("res/标题.png");
+      background-size: contain;
+      width: 80%;
+      background-repeat: no-repeat;
+    }
+
+    .roller {
+      position: absolute;
+      left: 10%;
+      top: 50%;
+      width: 80%;
+      transform: translateY(-50%);
+    }
+
+    .pan {
+      width: 100%;
+      position: absolute;
+      background-image: url("res/pan.png");
+      background-size: contain;
+      background-repeat: no-repeat;
+    }
+
+    .shadow {
+      width: 100%;
+      top: 90%;
+      position: absolute;
+      background-image: url("res/shadow.png");
+      background-size: contain;
+      background-repeat: no-repeat;
+    }
+
+    .pointer {
+      top: 34%;
+      left: 50%;
+      transform: translateX(-50%);
+      position: absolute;
+      width: 20%;
+      background-image: url("res/Go.png");
+      background-size: contain;
+      background-repeat: no-repeat;
+      cursor: pointer;
+    }
+
+    .pan .gift {
+      position: absolute;
+      height: 100%;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .pan .gift {
+      color: #e30000;
+      font-weight: bolder;
+    }
+
+    .pan .gift span {
+      margin-top: 10%;
+    }
+
+    .pan .gift div {
+      background-size: contain;
+      background-repeat: no-repeat;
+      width: 13%;
+      background-position: center;
+      margin-top: 2%;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="title" data-ratio="2.5"></div>
+    <div class="roller" data-ratio="1">
+      <div class="shadow" data-ratio="3"></div>
+      <div class="pan" data-ratio="1"></div>
+      <div class="pointer" data-ratio="0.7"></div>
+    </div>
+  </div>
+  <script>
+    const list = [{
+      name: '项链',
+      weight: 1,
+    }, {
+      name: '鞋包口红',
+      weight: 5,
+    }, {
+      name: '开会',
+      weight: 5,
+    }, {
+      name: '红包',
+      weight: 10,
+    }, {
+      name: '奶茶',
+      weight: 20,
+    }, {
+      name: '亲亲',
+      weight: 50,
+    }, {
+      name: '再接再厉',
+      weight: 100,
+    }];
+    const totalWeight = list.reduce((sum, item) => sum + item.weight, 0);
+    const per = 360 / 7;
+    // 设置高度
+    $('div').toArray().forEach(item => {
+      if (item.dataset.ratio) {
+        const ratio = parseFloat(item.dataset.ratio);
+        $(item).height($(item).width() / ratio);
+      }
+    });
+    // 绘制奖品
+    list.forEach((item, index) => {
+      const container = document.createElement('div');
+      container.classList.add('gift');
+      const span = document.createElement('span');
+      const text = document.createTextNode(item.name);
+      span.appendChild(text);
+      const image = document.createElement('div');
+      image.style.backgroundImage = `url(res/${item.name}.png)`;
+      container.appendChild(span);
+      container.appendChild(image);
+      container.style.transform = `rotate(${index * per}deg)`;
+      $('.pan')[0].appendChild(container);
+      $(image).height($(image).width());
+    });
+    // 计算奖品
+    function getItem() {
+      let value = Math.random() * totalWeight;
+      for (let item of list) {
+        if (item.weight > value) {
+          return item;
+        }
+        value -= item.weight;
+      }
+    }
+    let rolling = false;
+    $('.pointer').click(() => {
+      if (rolling) return;
+      rolling = true;
+      // 计算奖品
+      const item = getItem();
+      const index = list.indexOf(item);
+      const deg = 360 - per * index + 360 * 6 - per / 2 + Math.random() * per / 2 + per / 4;
+      console.log({
+        ...item,
+        index,
+        deg
+      });
+      // 旋转
+      $('.pan').animate(
+        {
+          transform: deg,
+        },
+        {
+          step: (now, tween) => $(tween.elem).css('transform', `rotate(${now}deg)`),
+          duration: 4000,
+          easing: 'swing',
+          // 提示奖品
+          complete: () => {
+            rolling = false;
+            if (item.name === "再接再厉") {
+              alert(`真遗憾，请再接再厉`);
+            } else {
+              alert(`恭喜你获得：${item.name}，请联系尹东方同学兑奖！`);
+            }
+          },
+        },
+      );
+    });
+  </script>
+</body>
+
+</html>
